@@ -1,39 +1,200 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>排队后台管理</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#ff5533',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background: #f5f5f7;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>队列系统-后台管理</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        orangeText: "#ff5533",
+        orange: "#fff1e9",
+      }
+    }
+  }
+}
+</script>
+<style>
+body {
+  background: #F5F5F7;
+  font-family: -apple-system, BlinkMacSystemFont, "无衬线体","平方SC","Microsoft YaHei";
+}
+</style>
 </head>
 <body class="p-4 max-w-md mx-auto">
-    <h2 class="text-xl font-bold mb-4">新增 / 编辑排队用户</h2>
+  <div class="bg-white rounded-xl p-5 shadow">
+    <h3 class="font-bold text-lg mb-4">新增 / 编辑排队用户</h3>
+    <div class="mb-3">
+      <label class="text-sm text-gray-500">访客验证码</label>
+      <input id="code" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="访客验证码">
+    </div>
+    <div class="mb-3">
+      <label class="text-sm text-gray-500">桌号</label>
+      <input id="tableNo" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="桌号">
+    </div>
+    <div class="mb-3">
+      <label class="text-sm text-gray-500">提示文字</label>
+      <input id="tip" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="提示文字">
+    </div>
+    <div class="mb-3">
+      <label class="text-sm text-gray-500">取号时间(HH:mm)</label>
+      <input id="time" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="取号时间">
+    </div>
+    <div class="mb-4">
+      <label class="text-sm text-gray-500">手机号信息</label>
+      <input id="phone" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="手机号信息">
+    </div>
+    <button id="saveBtn" class="w-full bg-orangeText text-white py-2 rounded-lg">保存</button>
+  </div>
 
-    <!-- 表单弹窗区域 -->
-    <div class="bg-white rounded-xl p-4 shadow mb-6">
-        <div class="mb-3">
-            <label class="text-sm text-gray-500">访客验证码</label>
-            <input id="code" type="text" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="验证码">
-        </div>
-        <div class="mb-3">
-            <label class="text-sm text-gray-500">桌号</label>
-            <input id="tableNo" type="text" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="桌号">
-        </div>
-        <div class="mb-
+  <div class="mt-6">
+    <h3 class="font-bold text-lg mb-3">用户列表</h3>
+    <div id="listBox"></div>
+  </div>
+
+<script>
+// ========= 这里改成你的云托管域名！！=========
+const baseUrl = "https://xxx.tencentcloudapi.com";
+
+let isEdit = false;
+let currentEditId = null;
+
+// 获取列表并渲染
+async function getQueueList() {
+  const res = await fetch(`${baseUrl}/api/queue`);
+  const json = await res.json();
+  renderList(json.data);
+}
+
+// 渲染列表，绑定编辑、失效、删除按钮
+function renderList(arr) {
+  const wrap = document.getElementById("listBox");
+  wrap.innerHTML = "";
+  arr.forEach(item => {
+    wrap.innerHTML += `
+    <div class="bg-white p-4 rounded-xl shadow mb-3">
+      <div>验证码：${item.code}</div>
+      <div>桌号：${item.tableNo}</div>
+      <div>状态：${item.status === 1 ? "✅启用" : "❌失效"}</div>
+      <div class="flex gap-2 mt-3">
+        <button onclick="openEdit(${JSON.stringify(item).replaceAll('"','&quot;')})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">编辑</button>
+        <button onclick="copyItem(${JSON.stringify(item).replaceAll('"','&quot;')})" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm">复制</button>
+        <button onclick="setInvalid(${item.id})" class="bg-orange-500 text-white px-2 py-1 rounded text-sm">设为失效</button>
+        <button onclick="delItem(${item.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">删除</button>
+      </div>
+    </div>
+    `
+  })
+}
+
+// 打开编辑，回填表单
+function openEdit(item) {
+  isEdit = true;
+  currentEditId = item.id;
+  document.getElementById("code").value = item.code;
+  document.getElementById("tableNo").value = item.tableNo;
+  document.getElementById("tip").value = item.tip ?? "";
+  document.getElementById("time").value = item.time ?? "";
+  document.getElementById("phone").value = item.phone ?? "";
+}
+
+// 复制一条（新增模式，回填表单）
+function copyItem(item) {
+  isEdit = false;
+  currentEditId = null;
+  document.getElementById("code").value = item.code;
+  document.getElementById("tableNo").value = item.tableNo;
+  document.getElementById("tip").value = item.tip ?? "";
+  document.getElementById("time").value = item.time ?? "";
+  document.getElementById("phone").value = item.phone ?? "";
+}
+
+// 保存按钮事件（核心！新增/编辑共用）
+document.getElementById("saveBtn").onclick = async function () {
+  console.log("保存按钮点击了！"); // 调试：控制台看这句打不打印
+  const formData = {
+    code: document.getElementById("code").value.trim(),
+    tableNo: document.getElementById("tableNo").value.trim(),
+    tip: document.getElementById("tip").value.trim(),
+    time: document.getElementById("time").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    status: 1
+  };
+
+  try {
+    if (isEdit) {
+      // 编辑接口
+      const resp = await fetch(`${baseUrl}/api/queue/edit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: currentEditId,
+          ...formData
+        })
+      })
+      const ret = await resp.json();
+      alert(ret.msg);
+    } else {
+      // 新增接口
+      const resp = await fetch(`${baseUrl}/api/queue/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      })
+      const ret = await resp.json();
+      alert(ret.msg);
+    }
+    // 保存成功后：重置表单 + 重新拉取最新列表
+    resetForm();
+    getQueueList();
+  } catch (err) {
+    console.error("保存报错：", err);
+    alert("请求失败，检查域名和网络");
+  }
+}
+
+// 删除
+async function delItem(id) {
+  if (!confirm("确定删除？")) return;
+  await fetch(`${baseUrl}/api/queue/del`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({id})
+  })
+  getQueueList();
+}
+
+// 设置失效
+async function setInvalid(id) {
+  await fetch(`${baseUrl}/api/queue/invalid`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({id})
+  })
+  getQueueList();
+}
+
+// 清空表单，切回新增模式
+function resetForm() {
+  isEdit = false;
+  currentEditId = null;
+  document.getElementById("code").value = "";
+  document.getElementById("tableNo").value = "";
+  document.getElementById("tip").value = "";
+  document.getElementById("time").value = "";
+  document.getElementById("phone").value = "";
+}
+
+// 页面加载自动拉列表
+getQueueList();
+</script>
+</body>
+</html>
