@@ -11,7 +11,7 @@
             theme: {
                 extend: {
                     colors: {
-                        orangeText: '#ff5533',
+                        orangeText: '#ff7a38',
                     },
                 }
             }
@@ -46,12 +46,11 @@
             <input id="setTakeTime" class="w-full border rounded-lg px-3 py-2 mb-3">
             <label class="block text-sm text-gray-700 mb-1">手机号信息</label>
             <input id="setPhoneLine" class="w-full border rounded-lg px-3 py-2 mb-3">
-            <!-- 新增：排队状态下拉 -->
             <label class="block text-sm text-gray-700 mb-1">排队进度状态</label>
             <select id="setStatus" class="w-full border rounded-lg px-3 py-2 mb-3">
                 <option value="0">取号成功</option>
-                <option value="1">商家叫号</option>
-                <option value="2">待就餐</option>
+                <option value="1">待叫号</option>
+                <option value="2">已就餐</option>
             </select>
             <button onclick="saveUser()" class="w-full bg-orangeText text-white py-2 rounded-lg">保存</button>
         </div>
@@ -66,8 +65,8 @@
 let userList = [];
 const statusMap = {
     0: "取号成功",
-    1: "商家叫号",
-    2: "待就餐"
+    1: "待叫号",
+    2: "已就餐"
 };
 
 async function checkAdmin(){
@@ -179,9 +178,6 @@ async function delUser(id){
             body:JSON.stringify({id})
         });
         await loadList();
-    } catch(e) {
-        alert("删除失败："+e.message);
-        console.error(e);
     }
 }
 
@@ -213,7 +209,7 @@ function renderUserList(){
             <div class="flex gap-2 mt-3 flex-wrap">
                 <button onclick='editUserById(${item.id})' class="px-2 py-1 bg-blue-500 text-white rounded text-sm">编辑</button>
                 <button onclick='cloneUserById(${item.id})' class="px-2 py-1 bg-yellow-500 text-white rounded text-sm">复制</button>
-                <button onclick="toggleUser(${item.id})" class="px-2 py-1 ${item.enabled ? 'bg-orange-500' : 'bg-green-500'} text-white rounded text-sm">${item.enabled ? '设为失效' : '恢复启用'}</button>
+                <button onclick="toggleUser(${item.id})" class="px-2 py-1 ${item.enabled ? 'bg-orangeText' : 'bg-green-500'} text-white rounded text-sm">${item.enabled ? '设为失效' : '恢复启用'}</button>
                 <button onclick="delUser(${item.id})" class="px-2 py-1 bg-red-500 text-white rounded text-sm">删除</button>
             </div>
         `;
