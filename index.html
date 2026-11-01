@@ -25,17 +25,77 @@
             margin: 0;
             padding: 0;
         }
-        .progress-track {
-            height:6px;
-            background:#e8e8e8;
-            border-radius:999px;
-            width:100%;
-            position:relative;
+        /* 步骤条容器 */
+        .step-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin-top:16px;
         }
-        .progress-bar {
-            height:6px;
-            background:#ff7a38;
-            border-radius:999px;
+        .step-line-bg {
+            position:absolute;
+            left:0;top:14px;
+            width:100%;
+            height:4px;
+            background:#e6e6e6;
+            z-index:1;
+        }
+        .step-line-active {
+            position:absolute;
+            left:0;top:14px;
+            height:4px;
+            background:#ff7020;
+            z-index:2;
+        }
+        .step-item {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            z-index:3;
+        }
+        .step-circle {
+            width:28px;height:28px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:14px;
+            font-weight:bold;
+        }
+        .step-circle.finish {
+            background:#ff7020;
+            color:white;
+        }
+        .step-circle.current {
+            background:#ff7020;
+            color:white;
+            box-shadow: 0 0 0 6px rgba(255,112,32,0.2);
+        }
+        .step-circle.wait {
+            background:#e6e6e6;
+            color:#999;
+        }
+        .step-text {
+            margin-top:8px;
+            font-size:16px;
+        }
+        .step-text.finish,.step-text.current {
+            color:#ff7020;
+            font-weight:500;
+        }
+        .step-text.wait {
+            color:#666;
+        }
+        .step-gray .step-line-active{
+            background:#cccccc;
+        }
+        .step-gray .step-circle.finish{
+            background:#cccccc;
+            color:#fff;
+        }
+        .step-gray .step-text.finish{
+            color:#666;
         }
     </style>
 </head>
@@ -49,7 +109,7 @@
         </div>
     </div>
 
-    <!-- 正常排队模板 -->
+    <!-- 正常排队模板：取号成功 / 待叫号 / 待就餐 ｜ 步骤：取号成功、待叫号、已就餐 -->
     <div id="normalPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -66,15 +126,27 @@
             <h1 id="titleNo" class="text-[42px] font-bold text-orangeText mt-4">双人位 B353</h1>
             <p id="waitDesc" class="text-gray-700 text-lg mt-2">还需等待262桌，大于30分钟</p>
 
-            <!-- 三步进度 -->
-            <div class="mt-4">
-                <div class="progress-track">
-                    <div id="bar" class="progress-bar"></div>
+            <!-- 正常流程步骤条 -->
+            <div class="step-wrap" id="normalStepWrap">
+                <div class="step-line-bg"></div>
+                <div class="step-line-active" id="normalActiveLine"></div>
+                <div class="step-item">
+                    <div class="step-circle" id="s0-circle">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <div class="step-text" id="s0-text">取号成功</div>
                 </div>
-                <div class="flex justify-between mt-2 text-sm text-gray-500">
-                    <span>取号成功</span>
-                    <span>待叫号</span>
-                    <span>已就餐</span>
+                <div class="step-item">
+                    <div class="step-circle" id="s1-circle">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <div class="step-text" id="s1-text">待叫号</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="s2-circle">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <div class="step-text" id="s2-text">已就餐</div>
                 </div>
             </div>
         </div>
@@ -130,7 +202,7 @@
         </div>
     </div>
 
-    <!-- 已过号模板 -->
+    <!-- 已过号模板：步骤：取号成功、商家叫号、已过号，全部灰色 -->
     <div id="passedPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center">
             <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
@@ -138,18 +210,27 @@
         </div>
         <div class="px-4 py-8 text-center">
             <h2 class="text-2xl font-bold text-gray-800">已过号，请咨询商家或重新取号</h2>
-            <div class="flex justify-between mt-6 text-sm text-gray-400">
-                <div class="flex flex-col items-center">
-                    <i class="fa fa-check-circle text-xl"></i>
-                    <span>取号成功</span>
+            <!-- 已过号步骤条 全灰色 -->
+            <div class="step-wrap step-gray" id="passedStepWrap">
+                <div class="step-line-bg"></div>
+                <div class="step-line-active" style="width:100%"></div>
+                <div class="step-item">
+                    <div class="step-circle finish">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <div class="step-text finish">取号成功</div>
                 </div>
-                <div class="flex flex-col items-center">
-                    <i class="fa fa-check-circle text-xl"></i>
-                    <span>商家叫号</span>
+                <div class="step-item">
+                    <div class="step-circle finish">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <div class="step-text finish">商家叫号</div>
                 </div>
-                <div class="flex flex-col items-center">
-                    <i class="fa fa-check-circle text-xl"></i>
-                    <span>已过号</span>
+                <div class="step-item">
+                    <div class="step-circle finish">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <div class="step-text finish">已过号</div>
                 </div>
             </div>
             <div class="text-left mt-6 text-gray-700 text-sm">
@@ -170,7 +251,13 @@
 
 <script>
 let currentUser = null;
-const MAX_WAIT = 300; // 基准最大桌数，可自行修改
+const MAX_WAIT = 300;
+// 正常状态：0取号成功，1待叫号，2待就餐
+const stepPercentMap = {
+    0: 0,
+    1: 50,
+    2: 100
+};
 const statusMapText = {
     0:"取号成功",
     1:"待叫号",
@@ -190,7 +277,6 @@ async function checkVisitorCode() {
         if(ret.ok){
             currentUser = ret.data;
             document.getElementById('loginBox').classList.add('hidden');
-            // 判断状态
             if(currentUser.status === 3){
                 document.getElementById('passedPage').classList.remove('hidden');
             }else{
@@ -231,19 +317,30 @@ function loadViewData(){
     if(!currentUser) return;
     const waitMin = calcWaitMinutes(currentUser.takeTime);
     if(currentUser.status === 3){
-        // 已过号页面
         document.getElementById('passedNo').innerText = `我的号码：${currentUser.no}号`;
         document.getElementById('passedTime').innerText = `取号时间：${currentUser.takeTime}（已等待 ${waitMin} 分钟）`;
         document.getElementById('passedPhone').innerText = currentUser.phone;
     }else{
-        // 正常排队页面
         document.getElementById('titleNo').innerText = currentUser.no;
         document.getElementById('waitDesc').innerText = `还需等待${currentUser.waitNum}桌，${currentUser.waitText}`;
         document.getElementById('lineTime').innerText = `取号时间：${currentUser.takeTime}（已等待 ${waitMin} 分钟）`;
         document.getElementById('linePhone').innerText = currentUser.phone;
-        // 进度条计算 waitNum越小，百分比越高
-        let percent = Math.max(0, Math.min(100, (MAX_WAIT - currentUser.waitNum) / MAX_WAIT * 100));
-        document.getElementById('bar').style.width = percent + "%";
+        // 更新步骤条
+        const pct = stepPercentMap[currentUser.status];
+        document.getElementById('normalActiveLine').style.width = pct + "%";
+        // 重置所有节点样式
+        for(let i=0;i<=2;i++){
+            document.getElementById(`s${i}-circle`).className = "step-circle wait";
+            document.getElementById(`s${i}-text`).className = "step-text wait";
+        }
+        // 已完成节点
+        for(let i=0;i < currentUser.status;i++){
+            document.getElementById(`s${i}-circle`).className = "step-circle finish";
+            document.getElementById(`s${i}-text`).className = "step-text finish";
+        }
+        // 当前节点
+        document.getElementById(`s${currentUser.status}-circle`).className = "step-circle current";
+        document.getElementById(`s${currentUser.status}-text`).className = "step-text current";
     }
 }
 
