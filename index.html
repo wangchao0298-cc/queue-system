@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排队详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        orangeText: '#ff5533',
+                        orangeLight: '#fff1e9',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .progress-line {
+            height: 6px;
+            background: linear-gradient(90deg, #ff7a38 0%, #ff7a38 70%, #e8e8e8 70%);
+            border-radius: 999px;
+        }
+        .product-img {
+            width: 112px;
+            height: 112px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #ff5533;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginBox" class="max-w-md mx-auto min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white w-full rounded-xl p-6 shadow">
+            <h2 class="text-xl font-bold text-center mb-4">请输入验证码查看排队信息</h2>
+            <input id="visitorCodeInput" type="text" placeholder="输入验证码" class="w-full border rounded-lg px-3 py-2 mb-4">
+            <button onclick="checkVisitorCode()" class="w-full bg-orangeText text-white py-2 rounded-lg">确认</button>
+            <div id="errTip" class="text-red-500 mt-2 text-center hidden">验证码无效或已失效</div>
+        </div>
+    </div>
+
+    <div id="mainPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
+        <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
+                    <span class="text-base font-semibold text-gray-800">盛香亭转转热卤(龙华壹方天地店)</span>
+                </div>
+                <i class="fa fa-ellipsis-v text-lg text-gray-500"></i>
+            </div>
+        </div>
+
+        <div class="bg-white px-4 pt-3 pb-4 text-center">
+            <div class="inline-block bg-orangeLight text-orangeText px-4 py-2 rounded-lg text-sm font-medium">
+                当前时间 <span id="timeDisplay">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="bg-white px-4 pb-5 text-center">
+            <h1 id="titleNo" class="text-[42px] font-bold text-orangeText leading-none">双人位 B353</h1>
+            <p id="titleTip" class="text-gray-700 text-[17px] mt-3">
+                <span class="status-dot mr-1"></span>
+                叫号中，预计等待大于30分钟
+            </p>
+        </div>
+
+        <div class="bg-white px-4 py-4 mb-2">
+            <div class="relative">
+                <div class="progress-line w-full"></div>
+                <div class="flex justify-between -mt-[14px]">
+                    <div class="flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
+                            <i class="fa fa-check text-white text-sm"></i>
+                        </div>
+                        <span class="mt-2 text-sm text-gray-700">取号成功</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
+                            <i class="fa fa-check text-white text-sm"></i>
+                        </div>
+                        <span class="mt-2 text-sm text-gray-700">商家叫号</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full border-2 border-orangeText bg-white"></div>
+                        <span class="mt-2 text-sm text-orangeText font-medium">待就餐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-700">盛香亭转转热卤(龙华壹方天地店)</span>
+                    <i class="fa fa-angle-right ml-1 text-gray-400 text-xs"></i>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">进度通知</span>
+                    <div class="w-11 h-6 rounded-full bg-orangeText relative">
+                        <div class="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-2 text-sm text-gray-700">
+                <p id="lineTime">取号时间：2026-11-01 13:02（已等待 1 分钟）</p>
+                <p id="linePhone">手机号码：151****8890（线上取号）</p>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <span class="text-xs text-gray-500">如无法到店就餐，请及时取消</span>
+                <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm text-gray-700">取消排队</button>
+            </div>
+        </div>
+
+        <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-3">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-base font-bold text-gray-800">商家说明</h3>
+                <span class="text-xs text-gray-500">全部 ></span>
+            </div>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                温馨提示：本店为食品经营场所，根据相关规定，所有宠物（持有效证件的导盲犬等工作犬除外）禁止进入门店内用餐区域，谢谢配合！取号及过号规则请点击“全部”查看。
+            </p>
+        </div>
+
+        <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-6">
+            <h3 class="text-base font-bold text-gray-800 mb-3">热销团购</h3>
+            <div class="flex gap-3">
+                <img id="groupImg" src="tu1.jpg" alt="团购商品" class="product-img">
+                <div class="flex-1 flex flex-col justify-between">
+                    <h4 class="text-sm text-gray-800 font-medium leading-snug">香香孜然卤+红石榴饮品（三店通用）</h4>
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <span class="text-orangeText text-xl font-bold">¥15.8</span>
+                            <span class="text-gray-400 text-xs ml-1">6.6折</span>
+                            <span class="text-gray-400 text-xs line-through ml-1">¥24</span>
+                            <p class="text-xs text-gray-500 mt-1">美团补贴 | 共省8.2元</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-500">半年售1.8万+</p>
+                            <button class="bg-orangeText text-white px-4 py-1.5 rounded-full mt-1 text-sm">抢购</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+let currentUser = null;
+async function checkVisitorCode() {
+    const input = document.getElementById('visitorCodeInput').value.trim();
+    if(input === "dev7777777"){
+        location.href = "admin.html";
+        return;
+    }
+    try {
+        const res = await fetch(`/api/query?code=${encodeURIComponent(input)}`);
+        const ret = await res.json();
+        if(ret.ok){
+            currentUser = ret.data;
+            document.getElementById('loginBox').classList.add('hidden');
+            document.getElementById('mainPage').classList.remove('hidden');
+            loadViewData();
+        }else{
+            document.getElementById('errTip').classList.remove('hidden');
+        }
+    } catch(e) {
+        alert("查询失败，服务异常："+e.message);
+        console.error(e);
+    }
+}
+function backLogin(){
+    currentUser = null;
+    document.getElementById('loginBox').classList.remove('hidden');
+    document.getElementById('mainPage').classList.add('hidden');
+    document.getElementById('errTip').classList.add('hidden');
+    document.getElementById('visitorCodeInput').value = '';
+}
+function calcWaitMinutes(takeTimeStr) {
+    const [takeH, takeM] = takeTimeStr.split(':').map(Number);
+    const now = new Date();
+    const takeDate = new Date();
+    takeDate.setHours(takeH, takeM, 0, 0);
+    let diffMs = now - takeDate;
+    if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
+    return Math.floor(diffMs / (1000 * 60));
+}
+function pad(num) {
+    return String(num).padStart(2, '0');
+}
+function loadViewData() {
+    if(!currentUser) return;
+    document.getElementById('titleNo').innerText = currentUser.no;
+    document.getElementById('titleTip').innerText = currentUser.tip;
+    const takeTime = currentUser.takeTime;
+    const waitMin = calcWaitMinutes(takeTime);
+    const now = new Date();
+    const dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    document.getElementById('lineTime').innerText = `取号时间：${dateStr} ${takeTime}（已等待 ${waitMin} 分钟）`;
+    document.getElementById('linePhone').innerText = `手机号码：${currentUser.phone}`;
+}
+function updateTime() {
+    const now = new Date();
+    const hh = pad(now.getHours());
+    const mm = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
+    document.getElementById('timeDisplay').innerText = `${hh}:${mm}:${ss}`;
+    if(!document.getElementById('mainPage').classList.contains('hidden') && currentUser){
+        loadViewData();
+    }
+}
+updateTime();
+setInterval(updateTime, 1000);
+</script>
+</body>
+</html>
