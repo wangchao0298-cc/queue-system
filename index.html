@@ -87,15 +87,43 @@
         .step-text.wait {
             color:#666;
         }
-        .step-gray .step-line-active{
-            background:#cccccc;
+        /* ========== 全新：已过号专用步骤条样式（匹配你图3效果） ========== */
+        .step-passed-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 24px;
         }
-        .step-gray .step-circle.finish{
-            background:#cccccc;
-            color:#fff;
+        .step-passed-line {
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            z-index: 1;
         }
-        .step-gray .step-text.finish{
-            color:#666;
+        .step-passed-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+        .step-passed-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-passed-text {
+            margin-top: 8px;
+            font-size: 16px;
+            color: #666;
         }
     </style>
 </head>
@@ -109,7 +137,7 @@
         </div>
     </div>
 
-    <!-- 正常排队模板：取号成功 / 待叫号 / 待就餐 ｜ 步骤：取号成功、待叫号、已就餐 -->
+    <!-- 正常排队模板：取号成功 / 商家叫号 / 已就餐 -->
     <div id="normalPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -126,7 +154,7 @@
             <h1 id="titleNo" class="text-[42px] font-bold text-orangeText mt-4">双人位 B353</h1>
             <p id="waitDesc" class="text-gray-700 text-lg mt-2">还需等待262桌，大于30分钟</p>
 
-            <!-- 正常流程步骤条 -->
+            <!-- 正常流程步骤条【文字更新：取号成功、商家叫号、已就餐】 -->
             <div class="step-wrap" id="normalStepWrap">
                 <div class="step-line-bg"></div>
                 <div class="step-line-active" id="normalActiveLine"></div>
@@ -140,7 +168,7 @@
                     <div class="step-circle" id="s1-circle">
                         <i class="fa fa-check"></i>
                     </div>
-                    <div class="step-text" id="s1-text">待叫号</div>
+                    <div class="step-text" id="s1-text">商家叫号</div>
                 </div>
                 <div class="step-item">
                     <div class="step-circle" id="s2-circle">
@@ -202,7 +230,7 @@
         </div>
     </div>
 
-    <!-- 已过号模板：步骤：取号成功、商家叫号、已过号，全部灰色 -->
+    <!-- 已过号模板：【这里直接替换成图3样式】 -->
     <div id="passedPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center">
             <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
@@ -210,29 +238,29 @@
         </div>
         <div class="px-4 py-8 text-center">
             <h2 class="text-2xl font-bold text-gray-800">已过号，请咨询商家或重新取号</h2>
-            <!-- 已过号步骤条 全灰色 -->
-            <div class="step-wrap step-gray" id="passedStepWrap">
-                <div class="step-line-bg"></div>
-                <div class="step-line-active" style="width:100%"></div>
-                <div class="step-item">
-                    <div class="step-circle finish">
+            <!-- ✅ 图3同款步骤条：取号成功、商家叫号、已过号，全部灰色打勾 -->
+            <div class="step-passed-wrap">
+                <div class="step-passed-line"></div>
+                <div class="step-passed-item">
+                    <div class="step-passed-circle">
                         <i class="fa fa-check"></i>
                     </div>
-                    <div class="step-text finish">取号成功</div>
+                    <div class="step-passed-text">取号成功</div>
                 </div>
-                <div class="step-item">
-                    <div class="step-circle finish">
+                <div class="step-passed-item">
+                    <div class="step-passed-circle">
                         <i class="fa fa-check"></i>
                     </div>
-                    <div class="step-text finish">商家叫号</div>
+                    <div class="step-passed-text">商家叫号</div>
                 </div>
-                <div class="step-item">
-                    <div class="step-circle finish">
+                <div class="step-passed-item">
+                    <div class="step-passed-circle">
                         <i class="fa fa-check"></i>
                     </div>
-                    <div class="step-text finish">已过号</div>
+                    <div class="step-passed-text">已过号</div>
                 </div>
             </div>
+
             <div class="text-left mt-6 text-gray-700 text-sm">
                 <p id="passedNo">我的号码：双人位B353号</p>
                 <p id="passedTime">取号时间：13:02（已等待 231 分钟）</p>
@@ -252,7 +280,7 @@
 <script>
 let currentUser = null;
 const MAX_WAIT = 300;
-// 正常状态：0取号成功，1待叫号，2待就餐
+// 正常状态：0取号成功，1商家叫号，2已就餐
 const stepPercentMap = {
     0: 0,
     1: 50,
@@ -260,8 +288,8 @@ const stepPercentMap = {
 };
 const statusMapText = {
     0:"取号成功",
-    1:"待叫号",
-    2:"待就餐",
+    1:"商家叫号",
+    2:"已就餐",
     3:"已过号"
 };
 
