@@ -3,15 +3,15 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// 顺序很重要：cors、json解析放在最前面
 app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
+// waitNum剩余桌数，waitText预估文字，status就餐状态
 let queueList = [
-  { id: 1, code: '1', no: '双人位B101', tip: '还需等待10桌，预计大于20分钟', takeTime: '12:30', phone: '138****1111（线上取号）', enabled: true },
-  { id: 2, code: '2', no: '双人位B202', tip: '还需等待257桌，预计大于30分钟', takeTime: '13:02', phone: '151****8960（线上取号）', enabled: true },
-  { id: 3, code: '3', no: '四人位A05', tip: '还需等待5桌，预计10分钟', takeTime: '13:10', phone: '139****2222（线上取号）', enabled: true }
+  { id: 1, code: '1', no: '双人位B101', waitNum:10, waitText:'预计大于20分钟', takeTime: '12:30', phone: '138****1111（线上取号）', enabled: true, status:1 },
+  { id: 2, code: '2', no: '双人位B202', waitNum:257, waitText:'预计大于30分钟', takeTime: '13:02', phone: '151****8960（线上取号）', enabled: true, status:1 },
+  { id: 3, code: '3', no: '四人位A05', waitNum:5, waitText:'预计10分钟', takeTime: '13:10', phone: '139****2222（线上取号）', enabled: true, status:1 }
 ];
 const ADMIN_PASS = "dev7777777";
 
@@ -42,11 +42,29 @@ app.post('/api/save', (req, res) => {
   if (body.id) {
     const idx = queueList.findIndex(x => x.id == body.id);
     if (idx === -1) return res.json({ ok: false, msg: "找不到这条记录" });
-    // 覆盖更新，保留原来的enabled状态！重点！之前这里会丢enabled
-    queueList[idx] = { ...queueList[idx], code:body.code, no:body.no, tip:body.tip, takeTime:body.takeTime, phone:body.phone };
+    queueList[idx] = { 
+      ...queueList[idx], 
+      code:body.code, 
+      no:body.no, 
+      waitNum: Number(body.waitNum),
+      waitText: body.waitText,
+      takeTime:body.takeTime, 
+      phone:body.phone,
+      status: Number(body.status)
+    };
   } else {
     const newId = queueList.length ? Math.max(...queueList.map(i => i.id)) + 1 : 1;
-    queueList.push({ id: newId, enabled: true, code:body.code, no:body.no, tip:body.tip, takeTime:body.takeTime, phone:body.phone });
+    queueList.push({ 
+      id: newId, 
+      enabled: true, 
+      code:body.code, 
+      no:body.no, 
+      waitNum: Number(body.waitNum),
+      waitText: body.waitText,
+      takeTime:body.takeTime, 
+      phone:body.phone,
+      status: Number(body.status)
+    });
   }
   res.json({ ok: true });
 });
