@@ -92,6 +92,7 @@ async function loadList(){
 }
 
 async function saveUser(){
+    console.log("执行保存");
     const id = document.getElementById('editId').value;
     const code = document.getElementById('setCode').value.trim();
     const no = document.getElementById('setNo').value.trim();
@@ -101,13 +102,19 @@ async function saveUser(){
     if(!code){alert('验证码不能为空');return;}
     const payload = {id,code,no,tip,takeTime,phone};
     try {
-        await fetch("/api/save",{
+        const res = await fetch("/api/save",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(payload)
         });
-        clearForm();
-        await loadList();
+        const ret = await res.json();
+        if(ret.ok){
+            alert("✅ 保存成功");
+            clearForm();
+            await loadList();
+        }else{
+            alert("❌ 保存失败：" + (ret.msg || ''));
+        }
     } catch(e) {
         alert("保存失败："+e.message);
         console.error(e);
@@ -123,7 +130,10 @@ function clearForm(){
     document.getElementById('setPhoneLine').value = '';
 }
 
-function editUser(item){
+function editUserById(itemId){
+    // 改用id去数组里找数据，不再直接传json字符串，彻底解决引号崩溃bug
+    const item = userList.find(x=>x.id === itemId);
+    if(!item) return;
     document.getElementById('editId').value = item.id;
     document.getElementById('setCode').value = item.code;
     document.getElementById('setNo').value = item.no;
@@ -161,7 +171,9 @@ async function delUser(id){
     }
 }
 
-function cloneUser(item) {
+function cloneUserById(itemId) {
+    const item = userList.find(x=>x.id === itemId);
+    if(!item) return;
     document.getElementById('editId').value = '';
     document.getElementById('setCode').value = '';
     document.getElementById('setNo').value = item.no;
@@ -182,8 +194,8 @@ function renderUserList(){
             <p><span class="font-semibold">桌号：</span>${item.no}</p>
             <p><span class="font-semibold">状态：</span>${item.enabled ? '✅启用' : '❌已失效'}</p>
             <div class="flex gap-2 mt-3 flex-wrap">
-                <button onclick='editUser(${JSON.stringify(item)})' class="px-2 py-1 bg-blue-500 text-white rounded text-sm">编辑</button>
-                <button onclick='cloneUser(${JSON.stringify(item)})' class="px-2 py-1 bg-yellow-500 text-white rounded text-sm">复制</button>
+                <button onclick='editUserById(${item.id})' class="px-2 py-1 bg-blue-500 text-white rounded text-sm">编辑</button>
+                <button onclick='cloneUserById(${item.id})' class="px-2 py-1 bg-yellow-500 text-white rounded text-sm">复制</button>
                 <button onclick="toggleUser(${item.id})" class="px-2 py-1 ${item.enabled ? 'bg-orange-500' : 'bg-green-500'} text-white rounded text-sm">${item.enabled ? '设为失效' : '恢复启用'}</button>
                 <button onclick="delUser(${item.id})" class="px-2 py-1 bg-red-500 text-white rounded text-sm">删除</button>
             </div>
