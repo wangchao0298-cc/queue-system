@@ -25,10 +25,23 @@
             margin: 0;
             padding: 0;
         }
-        .progress-line {
+        /* 底层灰色轨道 */
+        .progress-track {
             height: 6px;
-            background: linear-gradient(90deg, #ff7a38 0%, #ff7a38 70%, #e8e8e8 70%);
+            background: #e8e8e8;
             border-radius: 999px;
+            width:100%;
+            position:relative;
+        }
+        /* 橙色填充条 */
+        .progress-fill {
+            height: 6px;
+            background: #ff7a38;
+            border-radius: 999px;
+            position:absolute;
+            left:0;
+            top:0;
+            transition: width 0.3s ease;
         }
         .product-img {
             width: 112px;
@@ -80,24 +93,27 @@
             </p>
         </div>
 
+        <!-- ========== 新版进度条 ========== -->
         <div class="bg-white px-4 py-4 mb-2">
             <div class="relative">
-                <div class="progress-line w-full"></div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
                 <div class="flex justify-between -mt-[14px]">
-                    <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
+                    <div class="step-item flex flex-col items-center">
+                        <div class="step-circle w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
                             <i class="fa fa-check text-white text-sm"></i>
                         </div>
                         <span class="mt-2 text-sm text-gray-700">取号成功</span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
+                    <div class="step-item flex flex-col items-center">
+                        <div class="step-circle w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
                             <i class="fa fa-check text-white text-sm"></i>
                         </div>
                         <span class="mt-2 text-sm text-gray-700">商家叫号</span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full border-2 border-orangeText bg-white"></div>
+                    <div class="step-item flex flex-col items-center">
+                        <div class="step-circle w-7 h-7 rounded-full border-2 border-orangeText bg-white"></div>
                         <span class="mt-2 text-sm text-orangeText font-medium">待就餐</span>
                     </div>
                 </div>
@@ -203,10 +219,50 @@ function calcWaitMinutes(takeTimeStr) {
 function pad(num) {
     return String(num).padStart(2, '0');
 }
+
+// 核心：根据status渲染进度条
+function setProgress(status) {
+    const fill = document.getElementById('progressFill');
+    const items = document.querySelectorAll('.step-item');
+    const circles = document.querySelectorAll('.step-circle');
+    const labels = document.querySelectorAll('.step-item span');
+
+    // 三个节点：0取号成功，1商家叫号，2待就餐
+    const percentMap = [0, 50, 100];
+    fill.style.width = percentMap[status] + '%';
+
+    for(let i=0; i<items.length; i++){
+        if(i < status){
+            // 已完成：实心+对勾
+            circles[i].classList.remove('bg-white','border-2','border-orangeText');
+            circles[i].classList.add('bg-orangeText');
+            circles[i].innerHTML = '<i class="fa fa-check text-white text-sm"></i>';
+            labels[i].classList.remove('text-orangeText','font-medium');
+            labels[i].classList.add('text-gray-700');
+        }else if(i === status){
+            // 当前节点：实心橙色，无对勾
+            circles[i].classList.remove('bg-white','border-2','border-orangeText');
+            circles[i].classList.add('bg-orangeText');
+            circles[i].innerHTML = '';
+            labels[i].classList.add('text-orangeText','font-medium');
+        }else{
+            // 未到：空心边框
+            circles[i].classList.remove('bg-orangeText');
+            circles[i].classList.add('bg-white','border-2','border-orangeText');
+            circles[i].innerHTML = '';
+            labels[i].classList.remove('text-orangeText','font-medium');
+            labels[i].classList.add('text-gray-700');
+        }
+    }
+}
+
 function loadViewData() {
     if(!currentUser) return;
     document.getElementById('titleNo').innerText = currentUser.no;
     document.getElementById('titleTip').innerText = currentUser.tip;
+    // 渲染进度条
+    setProgress(currentUser.status ?? 0);
+
     const takeTime = currentUser.takeTime;
     const waitMin = calcWaitMinutes(takeTime);
     const now = new Date();
