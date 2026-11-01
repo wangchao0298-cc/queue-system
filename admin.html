@@ -46,6 +46,13 @@
             <input id="setTakeTime" class="w-full border rounded-lg px-3 py-2 mb-3">
             <label class="block text-sm text-gray-700 mb-1">手机号信息</label>
             <input id="setPhoneLine" class="w-full border rounded-lg px-3 py-2 mb-3">
+            <!-- 新增：排队状态下拉 -->
+            <label class="block text-sm text-gray-700 mb-1">排队进度状态</label>
+            <select id="setStatus" class="w-full border rounded-lg px-3 py-2 mb-3">
+                <option value="0">取号成功</option>
+                <option value="1">商家叫号</option>
+                <option value="2">待就餐</option>
+            </select>
             <button onclick="saveUser()" class="w-full bg-orangeText text-white py-2 rounded-lg">保存</button>
         </div>
 
@@ -57,6 +64,11 @@
 
 <script>
 let userList = [];
+const statusMap = {
+    0: "取号成功",
+    1: "商家叫号",
+    2: "待就餐"
+};
 
 async function checkAdmin(){
     const pwd = document.getElementById('adminInput').value.trim();
@@ -99,8 +111,9 @@ async function saveUser(){
     const tip = document.getElementById('setTip').value.trim();
     const takeTime = document.getElementById('setTakeTime').value.trim();
     const phone = document.getElementById('setPhoneLine').value.trim();
+    const status = Number(document.getElementById('setStatus').value);
     if(!code){alert('验证码不能为空');return;}
-    const payload = {id,code,no,tip,takeTime,phone};
+    const payload = {id,code,no,tip,takeTime,phone,status};
     try {
         const res = await fetch("/api/save",{
             method:"POST",
@@ -128,10 +141,10 @@ function clearForm(){
     document.getElementById('setTip').value = '';
     document.getElementById('setTakeTime').value = '';
     document.getElementById('setPhoneLine').value = '';
+    document.getElementById('setStatus').value = 0;
 }
 
 function editUserById(itemId){
-    // 改用id去数组里找数据，不再直接传json字符串，彻底解决引号崩溃bug
     const item = userList.find(x=>x.id === itemId);
     if(!item) return;
     document.getElementById('editId').value = item.id;
@@ -140,6 +153,7 @@ function editUserById(itemId){
     document.getElementById('setTip').value = item.tip;
     document.getElementById('setTakeTime').value = item.takeTime;
     document.getElementById('setPhoneLine').value = item.phone;
+    document.getElementById('setStatus').value = item.status ?? 0;
 }
 
 async function toggleUser(id){
@@ -180,6 +194,7 @@ function cloneUserById(itemId) {
     document.getElementById('setTip').value = item.tip;
     document.getElementById('setTakeTime').value = item.takeTime;
     document.getElementById('setPhoneLine').value = item.phone;
+    document.getElementById('setStatus').value = item.status ?? 0;
     alert('✅ 已复制信息，请填写新验证码保存！');
 }
 
@@ -189,10 +204,12 @@ function renderUserList(){
     userList.forEach(item=>{
         const div = document.createElement('div');
         div.className = 'border p-3 rounded-lg ' + (item.enabled ? '' : 'bg-gray-100');
+        const s = item.status ?? 0;
         div.innerHTML = `
             <p><span class="font-semibold">验证码：</span>${item.code}</p>
             <p><span class="font-semibold">桌号：</span>${item.no}</p>
-            <p><span class="font-semibold">状态：</span>${item.enabled ? '✅启用' : '❌已失效'}</p>
+            <p><span class="font-semibold">排队进度：</span>${statusMap[s]}</p>
+            <p><span class="font-semibold">启用状态：</span>${item.enabled ? '✅启用' : '❌已失效'}</p>
             <div class="flex gap-2 mt-3 flex-wrap">
                 <button onclick='editUserById(${item.id})' class="px-2 py-1 bg-blue-500 text-white rounded text-sm">编辑</button>
                 <button onclick='cloneUserById(${item.id})' class="px-2 py-1 bg-yellow-500 text-white rounded text-sm">复制</button>
