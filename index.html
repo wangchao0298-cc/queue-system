@@ -25,23 +25,17 @@
             margin: 0;
             padding: 0;
         }
-        .progress-line {
-            height: 6px;
-            background: linear-gradient(90deg, #ff7a38 0%, #ff7a38 70%, #e8e8e8 70%);
-            border-radius: 999px;
+        .progress-track {
+            height:6px;
+            background:#e8e8e8;
+            border-radius:999px;
+            width:100%;
+            position:relative;
         }
-        .product-img {
-            width: 112px;
-            height: 112px;
-            border-radius: 12px;
-            object-fit: cover;
-        }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: #ff5533;
-            display: inline-block;
+        .progress-bar {
+            height:6px;
+            background:#ff7a38;
+            border-radius:999px;
         }
     </style>
 </head>
@@ -55,51 +49,32 @@
         </div>
     </div>
 
-    <div id="mainPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
-        <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
-                    <span class="text-base font-semibold text-gray-800">盛香亭转转热卤(龙华壹方天地店)</span>
-                </div>
-                <i class="fa fa-ellipsis-v text-lg text-gray-500"></i>
+    <!-- 正常排队模板 -->
+    <div id="normalPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
+        <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
+                <span class="text-base font-semibold text-gray-800">盛香亭转转热卤(龙华壹方天地店)</span>
             </div>
+            <i class="fa fa-ellipsis-h text-gray-500"></i>
         </div>
 
         <div class="bg-white px-4 pt-3 pb-4 text-center">
-            <div class="inline-block bg-orangeLight text-orangeText px-4 py-2 rounded-lg text-sm font-medium">
+            <div class="inline-block bg-orangeLight text-orangeText px-4 py-1 rounded-lg text-sm font-medium">
                 当前时间 <span id="timeDisplay">00:00:00</span>
             </div>
-        </div>
+            <h1 id="titleNo" class="text-[42px] font-bold text-orangeText mt-4">双人位 B353</h1>
+            <p id="waitDesc" class="text-gray-700 text-lg mt-2">还需等待262桌，大于30分钟</p>
 
-        <div class="bg-white px-4 pb-5 text-center">
-            <h1 id="titleNo" class="text-[42px] font-bold text-orangeText leading-none">双人位 B353</h1>
-            <p id="titleTip" class="text-gray-700 text-[17px] mt-3">
-                <span class="status-dot mr-1"></span>
-                叫号中，预计等待大于30分钟
-            </p>
-        </div>
-
-        <div class="bg-white px-4 py-4 mb-2">
-            <div class="relative">
-                <div class="progress-line w-full"></div>
-                <div class="flex justify-between -mt-[14px]">
-                    <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
-                            <i class="fa fa-check text-white text-sm"></i>
-                        </div>
-                        <span class="mt-2 text-sm text-gray-700">取号成功</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
-                            <i class="fa fa-check text-white text-sm"></i>
-                        </div>
-                        <span class="mt-2 text-sm text-gray-700">商家叫号</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full border-2 border-orangeText bg-white"></div>
-                        <span class="mt-2 text-sm text-orangeText font-medium">待就餐</span>
-                    </div>
+            <!-- 三步进度 -->
+            <div class="mt-4">
+                <div class="progress-track">
+                    <div id="bar" class="progress-bar"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-sm text-gray-500">
+                    <span>取号成功</span>
+                    <span>待叫号</span>
+                    <span>已就餐</span>
                 </div>
             </div>
         </div>
@@ -110,7 +85,7 @@
                     <span class="text-sm text-gray-700">盛香亭转转热卤(龙华壹方天地店)</span>
                     <i class="fa fa-angle-right ml-1 text-gray-400 text-xs"></i>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">
                     <span class="text-xs text-gray-500">进度通知</span>
                     <div class="w-11 h-6 rounded-full bg-orangeText relative">
                         <div class="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
@@ -118,8 +93,8 @@
                 </div>
             </div>
             <div class="space-y-2 text-sm text-gray-700">
-                <p id="lineTime">取号时间：2026-11-01 13:02（已等待 1 分钟）</p>
-                <p id="linePhone">手机号码：151****8890（线上取号）</p>
+                <p id="lineTime">取号时间：13:02（已等待 22 分钟）</p>
+                <p id="linePhone">手机号码：151****8960（线上取号）</p>
             </div>
             <div class="flex justify-between items-center mt-4">
                 <span class="text-xs text-gray-500">如无法到店就餐，请及时取消</span>
@@ -133,35 +108,76 @@
                 <span class="text-xs text-gray-500">全部 ></span>
             </div>
             <p class="text-sm text-gray-600 leading-relaxed">
-                温馨提示：本店为食品经营场所，根据相关规定，所有宠物（持有效证件的导盲犬等工作犬除外）禁止进入门店内用餐区域，谢谢配合！取号及过号规则请点击“全部”查看。
+                温馨提示：本店为食品经营场所，根据相关规定，所有宠物（持有效证件的导盲犬等工作犬除外）禁止进入门店内用餐区域，谢谢配合<br>！！！取号及过号规则请点击“全部……
             </p>
         </div>
 
         <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-6">
             <h3 class="text-base font-bold text-gray-800 mb-3">热销团购</h3>
             <div class="flex gap-3">
-                <img id="groupImg" src="tu1.jpg" alt="团购商品" class="product-img">
+                <img id="groupImg" src="tu1.jpg" alt="团购商品" class="w-28 h-28 rounded-lg object-cover">
                 <div class="flex-1 flex flex-col justify-between">
-                    <h4 class="text-sm text-gray-800 font-medium leading-snug">香香孜然卤+红石榴饮品（三店通用）</h4>
-                    <div class="flex items-end justify-between">
-                        <div>
-                            <span class="text-orangeText text-xl font-bold">¥15.8</span>
-                            <span class="text-gray-400 text-xs ml-1">6.6折</span>
-                            <span class="text-gray-400 text-xs line-through ml-1">¥24</span>
-                            <p class="text-xs text-gray-500 mt-1">美团补贴 | 共省8.2元</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs text-gray-500">半年售1.8万+</p>
-                            <button class="bg-orangeText text-white px-4 py-1.5 rounded-full mt-1 text-sm">抢购</button>
-                        </div>
+                    <h4 class="text-sm text-gray-800 font-medium">香香孜然卤+红石榴饮品（三店通用）</h4>
+                    <div>
+                        <span class="text-orangeText text-xl font-bold">¥15.8</span>
+                        <span class="text-gray-400 text-xs line-through ml-1">¥24</span>
+                        <p class="text-xs text-gray-500 mt-1">美团补贴 | 共省8.2元</p>
                     </div>
+                    <p class="text-xs text-gray-500">半年售1.8万+</p>
+                    <button class="bg-orangeText text-white px-4 py-1 rounded-full text-sm self-start">抢购</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- 已过号模板 -->
+    <div id="passedPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
+        <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center">
+            <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
+            <span class="text-base font-semibold text-gray-800 ml-2">盛香亭转转热卤(龙华壹方天地店)</span>
+        </div>
+        <div class="px-4 py-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-800">已过号，请咨询商家或重新取号</h2>
+            <div class="flex justify-between mt-6 text-sm text-gray-400">
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-check-circle text-xl"></i>
+                    <span>取号成功</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-check-circle text-xl"></i>
+                    <span>商家叫号</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-check-circle text-xl"></i>
+                    <span>已过号</span>
+                </div>
+            </div>
+            <div class="text-left mt-6 text-gray-700 text-sm">
+                <p id="passedNo">我的号码：双人位B353号</p>
+                <p id="passedTime">取号时间：13:02（已等待 231 分钟）</p>
+                <p id="passedPhone">手机号码：151****8960（线上取号）</p>
+            </div>
+            <button class="w-full border border-gray-300 rounded-full py-3 mt-6 text-gray-700">重新取号</button>
+        </div>
+        <div class="mx-3 rounded-xl p-4 bg-white shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-base font-bold text-gray-800">商家说明</h3>
+                <span class="text-xs text-gray-500">全部 ></span>
+            </div>
+            <p class="text-sm text-gray-600">温馨提示：本店为食品经营场所，根据相关规定，所有宠物（持有效证件的导盲犬等工作犬除外）禁止进入门店内用餐区域，谢谢配合<br>！！！取号及过号规则请点击“全部……</p>
+        </div>
+    </div>
+
 <script>
 let currentUser = null;
+const MAX_WAIT = 300; // 基准最大桌数，可自行修改
+const statusMapText = {
+    0:"取号成功",
+    1:"待叫号",
+    2:"待就餐",
+    3:"已过号"
+};
+
 async function checkVisitorCode() {
     const input = document.getElementById('visitorCodeInput').value.trim();
     if(input === "dev7777777"){
@@ -174,58 +190,73 @@ async function checkVisitorCode() {
         if(ret.ok){
             currentUser = ret.data;
             document.getElementById('loginBox').classList.add('hidden');
-            document.getElementById('mainPage').classList.remove('hidden');
+            // 判断状态
+            if(currentUser.status === 3){
+                document.getElementById('passedPage').classList.remove('hidden');
+            }else{
+                document.getElementById('normalPage').classList.remove('hidden');
+            }
             loadViewData();
         }else{
             document.getElementById('errTip').classList.remove('hidden');
         }
     } catch(e) {
-        alert("查询失败，服务异常："+e.message);
-        console.error(e);
+        alert("查询失败："+e.message);
     }
 }
+
 function backLogin(){
     currentUser = null;
     document.getElementById('loginBox').classList.remove('hidden');
-    document.getElementById('mainPage').classList.add('hidden');
+    document.getElementById('normalPage').classList.add('hidden');
+    document.getElementById('passedPage').classList.add('hidden');
     document.getElementById('errTip').classList.add('hidden');
-    document.getElementById('visitorCodeInput').value = '';
 }
+
 function calcWaitMinutes(takeTimeStr) {
-    const [takeH, takeM] = takeTimeStr.split(':').map(Number);
+    const [h, m] = takeTimeStr.split(':').map(Number);
+    const take = new Date();
+    take.setHours(h,m,0,0);
     const now = new Date();
-    const takeDate = new Date();
-    takeDate.setHours(takeH, takeM, 0, 0);
-    let diffMs = now - takeDate;
-    if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
-    return Math.floor(diffMs / (1000 * 60));
+    let diff = Math.floor((now - take) / (1000 * 60));
+    if(diff < 0) diff += 24*60;
+    return diff;
 }
+
 function pad(num) {
-    return String(num).padStart(2, '0');
+    return String(num).padStart(2,'0');
 }
-function loadViewData() {
+
+function loadViewData(){
     if(!currentUser) return;
-    document.getElementById('titleNo').innerText = currentUser.no;
-    document.getElementById('titleTip').innerText = currentUser.tip;
-    const takeTime = currentUser.takeTime;
-    const waitMin = calcWaitMinutes(takeTime);
-    const now = new Date();
-    const dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
-    document.getElementById('lineTime').innerText = `取号时间：${dateStr} ${takeTime}（已等待 ${waitMin} 分钟）`;
-    document.getElementById('linePhone').innerText = `手机号码：${currentUser.phone}`;
-}
-function updateTime() {
-    const now = new Date();
-    const hh = pad(now.getHours());
-    const mm = pad(now.getMinutes());
-    const ss = pad(now.getSeconds());
-    document.getElementById('timeDisplay').innerText = `${hh}:${mm}:${ss}`;
-    if(!document.getElementById('mainPage').classList.contains('hidden') && currentUser){
-        loadViewData();
+    const waitMin = calcWaitMinutes(currentUser.takeTime);
+    if(currentUser.status === 3){
+        // 已过号页面
+        document.getElementById('passedNo').innerText = `我的号码：${currentUser.no}号`;
+        document.getElementById('passedTime').innerText = `取号时间：${currentUser.takeTime}（已等待 ${waitMin} 分钟）`;
+        document.getElementById('passedPhone').innerText = currentUser.phone;
+    }else{
+        // 正常排队页面
+        document.getElementById('titleNo').innerText = currentUser.no;
+        document.getElementById('waitDesc').innerText = `还需等待${currentUser.waitNum}桌，${currentUser.waitText}`;
+        document.getElementById('lineTime').innerText = `取号时间：${currentUser.takeTime}（已等待 ${waitMin} 分钟）`;
+        document.getElementById('linePhone').innerText = currentUser.phone;
+        // 进度条计算 waitNum越小，百分比越高
+        let percent = Math.max(0, Math.min(100, (MAX_WAIT - currentUser.waitNum) / MAX_WAIT * 100));
+        document.getElementById('bar').style.width = percent + "%";
     }
 }
+
+function updateTime(){
+    const now = new Date();
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    document.getElementById('timeDisplay').innerText = timeStr;
+}
 updateTime();
-setInterval(updateTime, 1000);
+setInterval(updateTime,1000);
+setInterval(()=>{
+    if(currentUser) loadViewData();
+}, 30000);
 </script>
 </body>
 </html>
