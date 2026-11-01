@@ -40,12 +40,13 @@ app.post('/api/save', (req, res) => {
   const body = req.body;
   if (!body.code) return res.json({ ok: false, msg: "验证码不能为空" });
   if (body.id) {
-    const idx = queueList.findIndex(x => x.id === body.id);
-    if (idx === -1) return res.json({ ok: false });
-    queueList[idx] = { ...queueList[idx], ...body };
+    const idx = queueList.findIndex(x => x.id == body.id);
+    if (idx === -1) return res.json({ ok: false, msg: "找不到这条记录" });
+    // 覆盖更新，保留原来的enabled状态！重点！之前这里会丢enabled
+    queueList[idx] = { ...queueList[idx], code:body.code, no:body.no, tip:body.tip, takeTime:body.takeTime, phone:body.phone };
   } else {
     const newId = queueList.length ? Math.max(...queueList.map(i => i.id)) + 1 : 1;
-    queueList.push({ id: newId, enabled: true, ...body });
+    queueList.push({ id: newId, enabled: true, code:body.code, no:body.no, tip:body.tip, takeTime:body.takeTime, phone:body.phone });
   }
   res.json({ ok: true });
 });
@@ -58,7 +59,7 @@ app.post('/api/del', (req, res) => {
 
 app.post('/api/toggle', (req, res) => {
   const { id } = req.body;
-  const item = queueList.find(x => x.id === id);
+  const item = queueList.find(x => x.id == id);
   if (!item) return res.json({ ok: false });
   item.enabled = !item.enabled;
   res.json({ ok: true });
