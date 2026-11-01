@@ -87,6 +87,15 @@
         .step-text.wait {
             color:#666;
         }
+        /* 已过号图片容器，原来的step-passed样式保留但是不再使用 */
+        .passed-step-img{
+            width:100%;
+            margin-top:24px;
+        }
+        .passed-step-img img{
+            width:100%;
+            display:block;
+        }
         /* ========== 全新：已过号专用步骤条样式（匹配你图3效果） ========== */
         .step-passed-wrap {
             display: flex;
@@ -230,7 +239,7 @@
         </div>
     </div>
 
-    <!-- 已过号模板：【这里直接替换成图3样式】 -->
+    <!-- 已过号模板：【这里直接用tu2.jpg图片】 -->
     <div id="passedPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center">
             <i class="fa fa-arrow-left text-lg text-gray-700" onclick="backLogin()"></i>
@@ -238,27 +247,9 @@
         </div>
         <div class="px-4 py-8 text-center">
             <h2 class="text-2xl font-bold text-gray-800">已过号，请咨询商家或重新取号</h2>
-            <!-- ✅ 图3同款步骤条：取号成功、商家叫号、已过号，全部灰色打勾 -->
-            <div class="step-passed-wrap">
-                <div class="step-passed-line"></div>
-                <div class="step-passed-item">
-                    <div class="step-passed-circle">
-                        <i class="fa fa-check"></i>
-                    </div>
-                    <div class="step-passed-text">取号成功</div>
-                </div>
-                <div class="step-passed-item">
-                    <div class="step-passed-circle">
-                        <i class="fa fa-check"></i>
-                    </div>
-                    <div class="step-passed-text">商家叫号</div>
-                </div>
-                <div class="step-passed-item">
-                    <div class="step-passed-circle">
-                        <i class="fa fa-check"></i>
-                    </div>
-                    <div class="step-passed-text">已过号</div>
-                </div>
+            <!-- ✅ 替换为tu2.jpg原图 -->
+            <div class="passed-step-img">
+                <img src="tu2.jpg" alt="取号成功、商家叫号、已过号">
             </div>
 
             <div class="text-left mt-6 text-gray-700 text-sm">
