@@ -1,200 +1,196 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>队列系统-后台管理</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        orangeText: "#ff5533",
-        orange: "#fff1e9",
-      }
-    }
-  }
-}
-</script>
-<style>
-body {
-  background: #F5F5F7;
-  font-family: -apple-system, BlinkMacSystemFont, "无衬线体","平方SC","Microsoft YaHei";
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排队后台管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        orangeText: '#ff5533',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #fff1e9;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+    </style>
 </head>
-<body class="p-4 max-w-md mx-auto">
-  <div class="bg-white rounded-xl p-5 shadow">
-    <h3 class="font-bold text-lg mb-4">新增 / 编辑排队用户</h3>
-    <div class="mb-3">
-      <label class="text-sm text-gray-500">访客验证码</label>
-      <input id="code" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="访客验证码">
+<body class="max-w-md mx-auto p-4">
+    <div id="adminLogin" class="bg-white rounded-xl p-6 shadow mt-10">
+        <h2 class="text-xl font-bold text-center mb-4">后台登录</h2>
+        <input id="adminInput" type="text" placeholder="后台密码" class="w-full border rounded-lg px-3 py-2 mb-4">
+        <button onclick="checkAdmin()" class="w-full bg-orangeText text-white py-2 rounded-lg">登录</button>
+        <div id="adminErr" class="text-red-500 mt-2 text-center hidden">密码错误</div>
     </div>
-    <div class="mb-3">
-      <label class="text-sm text-gray-500">桌号</label>
-      <input id="tableNo" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="桌号">
-    </div>
-    <div class="mb-3">
-      <label class="text-sm text-gray-500">提示文字</label>
-      <input id="tip" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="提示文字">
-    </div>
-    <div class="mb-3">
-      <label class="text-sm text-gray-500">取号时间(HH:mm)</label>
-      <input id="time" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="取号时间">
-    </div>
-    <div class="mb-4">
-      <label class="text-sm text-gray-500">手机号信息</label>
-      <input id="phone" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="手机号信息">
-    </div>
-    <button id="saveBtn" class="w-full bg-orangeText text-white py-2 rounded-lg">保存</button>
-  </div>
 
-  <div class="mt-6">
-    <h3 class="font-bold text-lg mb-3">用户列表</h3>
-    <div id="listBox"></div>
-  </div>
+    <div id="adminPanel" class="hidden">
+        <div class="bg-white rounded-xl p-5 shadow mb-4">
+            <h3 class="font-bold text-lg mb-4">新增 / 编辑排队用户</h3>
+            <input type="hidden" id="editId">
+            <label class="block text-sm text-gray-700 mb-1">访客验证码</label>
+            <input id="setCode" class="w-full border rounded-lg px-3 py-2 mb-3">
+            <label class="block text-sm text-gray-700 mb-1">桌号</label>
+            <input id="setNo" class="w-full border rounded-lg px-3 py-2 mb-3">
+            <label class="block text-sm text-gray-700 mb-1">提示文字</label>
+            <input id="setTip" class="w-full border rounded-lg px-3 py-2 mb-3">
+            <label class="block text-sm text-gray-700 mb-1">取号时间（HH:mm）</label>
+            <input id="setTakeTime" class="w-full border rounded-lg px-3 py-2 mb-3">
+            <label class="block text-sm text-gray-700 mb-1">手机号信息</label>
+            <input id="setPhoneLine" class="w-full border rounded-lg px-3 py-2 mb-3">
+            <button onclick="saveUser()" class="w-full bg-orangeText text-white py-2 rounded-lg">保存</button>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 shadow mb-4">
+            <h3 class="font-bold text-lg mb-4">用户列表</h3>
+            <div id="userListBox" class="space-y-3"></div>
+        </div>
+    </div>
 
 <script>
-// ========= 这里改成你的云托管域名！！=========
-const baseUrl = "https://xxx.tencentcloudapi.com";
+let userList = [];
 
-let isEdit = false;
-let currentEditId = null;
-
-// 获取列表并渲染
-async function getQueueList() {
-  const res = await fetch(`${baseUrl}/api/queue`);
-  const json = await res.json();
-  renderList(json.data);
-}
-
-// 渲染列表，绑定编辑、失效、删除按钮
-function renderList(arr) {
-  const wrap = document.getElementById("listBox");
-  wrap.innerHTML = "";
-  arr.forEach(item => {
-    wrap.innerHTML += `
-    <div class="bg-white p-4 rounded-xl shadow mb-3">
-      <div>验证码：${item.code}</div>
-      <div>桌号：${item.tableNo}</div>
-      <div>状态：${item.status === 1 ? "✅启用" : "❌失效"}</div>
-      <div class="flex gap-2 mt-3">
-        <button onclick="openEdit(${JSON.stringify(item).replaceAll('"','&quot;')})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">编辑</button>
-        <button onclick="copyItem(${JSON.stringify(item).replaceAll('"','&quot;')})" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm">复制</button>
-        <button onclick="setInvalid(${item.id})" class="bg-orange-500 text-white px-2 py-1 rounded text-sm">设为失效</button>
-        <button onclick="delItem(${item.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">删除</button>
-      </div>
-    </div>
-    `
-  })
-}
-
-// 打开编辑，回填表单
-function openEdit(item) {
-  isEdit = true;
-  currentEditId = item.id;
-  document.getElementById("code").value = item.code;
-  document.getElementById("tableNo").value = item.tableNo;
-  document.getElementById("tip").value = item.tip ?? "";
-  document.getElementById("time").value = item.time ?? "";
-  document.getElementById("phone").value = item.phone ?? "";
-}
-
-// 复制一条（新增模式，回填表单）
-function copyItem(item) {
-  isEdit = false;
-  currentEditId = null;
-  document.getElementById("code").value = item.code;
-  document.getElementById("tableNo").value = item.tableNo;
-  document.getElementById("tip").value = item.tip ?? "";
-  document.getElementById("time").value = item.time ?? "";
-  document.getElementById("phone").value = item.phone ?? "";
-}
-
-// 保存按钮事件（核心！新增/编辑共用）
-document.getElementById("saveBtn").onclick = async function () {
-  console.log("保存按钮点击了！"); // 调试：控制台看这句打不打印
-  const formData = {
-    code: document.getElementById("code").value.trim(),
-    tableNo: document.getElementById("tableNo").value.trim(),
-    tip: document.getElementById("tip").value.trim(),
-    time: document.getElementById("time").value.trim(),
-    phone: document.getElementById("phone").value.trim(),
-    status: 1
-  };
-
-  try {
-    if (isEdit) {
-      // 编辑接口
-      const resp = await fetch(`${baseUrl}/api/queue/edit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          id: currentEditId,
-          ...formData
-        })
-      })
-      const ret = await resp.json();
-      alert(ret.msg);
-    } else {
-      // 新增接口
-      const resp = await fetch(`${baseUrl}/api/queue/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formData)
-      })
-      const ret = await resp.json();
-      alert(ret.msg);
+async function checkAdmin(){
+    const pwd = document.getElementById('adminInput').value.trim();
+    try {
+        const res = await fetch("/api/admin/login",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({pwd})
+        });
+        const ret = await res.json();
+        if(ret.ok){
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            await loadList();
+        }else{
+            document.getElementById('adminErr').classList.remove('hidden');
+        }
+    } catch(e) {
+        alert("请求失败！服务未启动/网络异常："+e.message);
+        console.error(e);
     }
-    // 保存成功后：重置表单 + 重新拉取最新列表
-    resetForm();
-    getQueueList();
-  } catch (err) {
-    console.error("保存报错：", err);
-    alert("请求失败，检查域名和网络");
-  }
 }
 
-// 删除
-async function delItem(id) {
-  if (!confirm("确定删除？")) return;
-  await fetch(`${baseUrl}/api/queue/del`, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({id})
-  })
-  getQueueList();
+async function loadList(){
+    try {
+        const res = await fetch("/api/list");
+        userList = await res.json();
+        renderUserList();
+    } catch(e) {
+        alert("加载列表失败："+e.message);
+        console.error(e);
+    }
 }
 
-// 设置失效
-async function setInvalid(id) {
-  await fetch(`${baseUrl}/api/queue/invalid`, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({id})
-  })
-  getQueueList();
+async function saveUser(){
+    const id = document.getElementById('editId').value;
+    const code = document.getElementById('setCode').value.trim();
+    const no = document.getElementById('setNo').value.trim();
+    const tip = document.getElementById('setTip').value.trim();
+    const takeTime = document.getElementById('setTakeTime').value.trim();
+    const phone = document.getElementById('setPhoneLine').value.trim();
+    if(!code){alert('验证码不能为空');return;}
+    const payload = {id,code,no,tip,takeTime,phone};
+    try {
+        await fetch("/api/save",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
+        clearForm();
+        await loadList();
+    } catch(e) {
+        alert("保存失败："+e.message);
+        console.error(e);
+    }
 }
 
-// 清空表单，切回新增模式
-function resetForm() {
-  isEdit = false;
-  currentEditId = null;
-  document.getElementById("code").value = "";
-  document.getElementById("tableNo").value = "";
-  document.getElementById("tip").value = "";
-  document.getElementById("time").value = "";
-  document.getElementById("phone").value = "";
+function clearForm(){
+    document.getElementById('editId').value = '';
+    document.getElementById('setCode').value = '';
+    document.getElementById('setNo').value = '';
+    document.getElementById('setTip').value = '';
+    document.getElementById('setTakeTime').value = '';
+    document.getElementById('setPhoneLine').value = '';
 }
 
-// 页面加载自动拉列表
-getQueueList();
+function editUser(item){
+    document.getElementById('editId').value = item.id;
+    document.getElementById('setCode').value = item.code;
+    document.getElementById('setNo').value = item.no;
+    document.getElementById('setTip').value = item.tip;
+    document.getElementById('setTakeTime').value = item.takeTime;
+    document.getElementById('setPhoneLine').value = item.phone;
+}
+
+async function toggleUser(id){
+    try {
+        await fetch("/api/toggle",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({id})
+        });
+        await loadList();
+    } catch(e) {
+        alert("切换状态失败："+e.message);
+        console.error(e);
+    }
+}
+
+async function delUser(id){
+    if(!confirm('确定删除？')) return;
+    try {
+        await fetch("/api/del",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({id})
+        });
+        await loadList();
+    } catch(e) {
+        alert("删除失败："+e.message);
+        console.error(e);
+    }
+}
+
+function cloneUser(item) {
+    document.getElementById('editId').value = '';
+    document.getElementById('setCode').value = '';
+    document.getElementById('setNo').value = item.no;
+    document.getElementById('setTip').value = item.tip;
+    document.getElementById('setTakeTime').value = item.takeTime;
+    document.getElementById('setPhoneLine').value = item.phone;
+    alert('✅ 已复制信息，请填写新验证码保存！');
+}
+
+function renderUserList(){
+    const box = document.getElementById('userListBox');
+    box.innerHTML = '';
+    userList.forEach(item=>{
+        const div = document.createElement('div');
+        div.className = 'border p-3 rounded-lg ' + (item.enabled ? '' : 'bg-gray-100');
+        div.innerHTML = `
+            <p><span class="font-semibold">验证码：</span>${item.code}</p>
+            <p><span class="font-semibold">桌号：</span>${item.no}</p>
+            <p><span class="font-semibold">状态：</span>${item.enabled ? '✅启用' : '❌已失效'}</p>
+            <div class="flex gap-2 mt-3 flex-wrap">
+                <button onclick='editUser(${JSON.stringify(item)})' class="px-2 py-1 bg-blue-500 text-white rounded text-sm">编辑</button>
+                <button onclick='cloneUser(${JSON.stringify(item)})' class="px-2 py-1 bg-yellow-500 text-white rounded text-sm">复制</button>
+                <button onclick="toggleUser(${item.id})" class="px-2 py-1 ${item.enabled ? 'bg-orange-500' : 'bg-green-500'} text-white rounded text-sm">${item.enabled ? '设为失效' : '恢复启用'}</button>
+                <button onclick="delUser(${item.id})" class="px-2 py-1 bg-red-500 text-white rounded text-sm">删除</button>
+            </div>
+        `;
+        box.appendChild(div);
+    })
+}
 </script>
 </body>
 </html>
