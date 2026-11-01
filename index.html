@@ -25,10 +25,40 @@
             margin: 0;
             padding: 0;
         }
-        .progress-line {
+        /* 进度容器 */
+        .step-wrap {
+            position: relative;
+        }
+        .step-bg-line {
             height: 6px;
-            background: linear-gradient(90deg, #ff7a38 0%, #ff7a38 70%, #e8e8e8 70%);
+            background: #e8e8e8;
             border-radius: 999px;
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+        .step-active-line {
+            height: 6px;
+            background: #ff5533;
+            border-radius: 999px;
+            position: absolute;
+            top: 10px;
+            left: 0;
+            z-index: 2;
+            transition: width 0.3s ease;
+        }
+        .step-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            position: relative;
+            z-index: 3;
+        }
+        /* 当前节点光晕 */
+        .dot-current {
+            box-shadow: 0 0 0 6px rgba(255,85,51,0.25);
         }
         .product-img {
             width: 112px;
@@ -80,25 +110,29 @@
             </p>
         </div>
 
+        <!-- 【重点：和截图一模一样的三步进度条】 -->
         <div class="bg-white px-4 py-4 mb-2">
-            <div class="relative">
-                <div class="progress-line w-full"></div>
-                <div class="flex justify-between -mt-[14px]">
+            <div class="step-wrap w-full h-[44px]">
+                <div class="step-bg-line"></div>
+                <div id="activeLine" class="step-active-line" style="width: 50%;"></div>
+                <div class="flex justify-between">
+                    <!-- 0 取号成功 -->
                     <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
-                            <i class="fa fa-check text-white text-sm"></i>
+                        <div id="dot0" class="step-dot bg-orangeText flex items-center justify-center">
+                            <i class="fa fa-check text-white text-xs"></i>
                         </div>
-                        <span class="mt-2 text-sm text-gray-700">取号成功</span>
+                        <span id="text0" class="mt-2 text-sm text-gray-700">取号成功</span>
                     </div>
+                    <!-- 1 待叫号 -->
                     <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full bg-orangeText flex items-center justify-center">
-                            <i class="fa fa-check text-white text-sm"></i>
+                        <div id="dot1" class="step-dot bg-orangeText flex items-center justify-center dot-current">
                         </div>
-                        <span class="mt-2 text-sm text-gray-700">商家叫号</span>
+                        <span id="text1" class="mt-2 text-sm text-orangeText font-medium">待叫号</span>
                     </div>
+                    <!-- 2 已就餐 -->
                     <div class="flex flex-col items-center">
-                        <div class="w-7 h-7 rounded-full border-2 border-orangeText bg-white"></div>
-                        <span class="mt-2 text-sm text-orangeText font-medium">待就餐</span>
+                        <div id="dot2" class="step-dot bg-gray-200"></div>
+                        <span id="text2" class="mt-2 text-sm text-gray-500">已就餐</span>
                     </div>
                 </div>
             </div>
@@ -162,6 +196,13 @@
 
 <script>
 let currentUser = null;
+// 状态映射
+const statusConf = [
+    {lineWidth: "0%", dot0:"bg-orangeText", dot1:"bg-gray-200", dot2:"bg-gray-200", text0:"text-orangeText font-medium", text1:"text-gray-500", text2:"text-gray-500", halo:0},
+    {lineWidth: "50%", dot0:"bg-orangeText", dot1:"bg-orangeText", dot2:"bg-gray-200", text0:"text-gray-700", text1:"text-orangeText font-medium", text2:"text-gray-500", halo:1},
+    {lineWidth: "100%", dot0:"bg-orangeText", dot1:"bg-orangeText", dot2:"bg-orangeText", text0:"text-gray-700", text1:"text-gray-700", text2:"text-orangeText font-medium", halo:2}
+];
+
 async function checkVisitorCode() {
     const input = document.getElementById('visitorCodeInput').value.trim();
     if(input === "dev7777777"){
@@ -213,6 +254,35 @@ function loadViewData() {
     const dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
     document.getElementById('lineTime').innerText = `取号时间：${dateStr} ${takeTime}（已等待 ${waitMin} 分钟）`;
     document.getElementById('linePhone').innerText = `手机号码：${currentUser.phone}`;
+
+    // 根据status渲染进度
+    const s = currentUser.status ?? 0;
+    const cfg = statusConf[s];
+    document.getElementById("activeLine").style.width = cfg.lineWidth;
+
+    // 重置样式
+    ["dot0","dot1","dot2"].forEach(id=>{
+        const el = document.getElementById(id);
+        el.className = "step-dot flex items-center justify-center";
+    })
+    ["text0","text1","text2"].forEach(id=>{
+        const el = document.getElementById(id);
+        el.className = "mt-2 text-sm";
+    })
+    document.getElementById("dot0").classList.add(...cfg.dot0.split(" "));
+    document.getElementById("dot1").classList.add(...cfg.dot1.split(" "));
+    document.getElementById("dot2").classList.add(...cfg.dot2.split(" "));
+    document.getElementById("text0").classList.add(...cfg.text0.split(" "));
+    document.getElementById("text1").classList.add(...cfg.text1.split(" "));
+    document.getElementById("text2").classList.add(...cfg.text2.split(" "));
+    // 光晕
+    if(cfg.halo === 0) document.getElementById("dot0").classList.add("dot-current");
+    if(cfg.halo === 1) document.getElementById("dot1").classList.add("dot-current");
+    if(cfg.halo === 2) document.getElementById("dot2").classList.add("dot-current");
+    // 已完成节点打勾
+    document.getElementById("dot0").innerHTML = `<i class="fa fa-check text-white text-xs"></i>`;
+    document.getElementById("dot1").innerHTML = s>=1 ? `<i class="fa fa-check text-white text-xs"></i>` : "";
+    document.getElementById("dot2").innerHTML = s>=2 ? `<i class="fa fa-check text-white text-xs"></i>` : "";
 }
 function updateTime() {
     const now = new Date();
