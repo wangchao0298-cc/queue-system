@@ -145,7 +145,6 @@
             <div id="errTip" class="text-red-500 mt-2 text-center hidden">验证码无效或已失效</div>
         </div>
     </div>
-
     <!-- 正常排队模板：取号成功 / 商家叫号 / 已就餐 -->
     <div id="normalPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between">
@@ -155,14 +154,12 @@
             </div>
             <i class="fa fa-ellipsis-h text-gray-500"></i>
         </div>
-
         <div class="bg-white px-4 pt-3 pb-4 text-center">
             <div class="inline-block bg-orangeLight text-orangeText px-4 py-1 rounded-lg text-sm font-medium">
                 当前时间 <span id="timeDisplay">00:00:00</span>
             </div>
             <h1 id="titleNo" class="text-[42px] font-bold text-orangeText mt-4">双人位 B353</h1>
             <p id="waitDesc" class="text-gray-700 text-lg mt-2">还需等待262桌，大于30分钟</p>
-
             <!-- 正常流程步骤条【文字更新：取号成功、商家叫号、已就餐】 -->
             <div class="step-wrap" id="normalStepWrap">
                 <div class="step-line-bg"></div>
@@ -187,7 +184,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-3">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center">
@@ -210,7 +206,6 @@
                 <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm text-gray-700">取消排队</button>
             </div>
         </div>
-
         <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-3">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="text-base font-bold text-gray-800">商家说明</h3>
@@ -220,7 +215,6 @@
                 温馨提示：本店为食品经营场所，根据相关规定，所有宠物（持有效证件的导盲犬等工作犬除外）禁止进入门店内用餐区域，谢谢配合<br>！！！取号及过号规则请点击“全部……
             </p>
         </div>
-
         <div class="bg-white mx-3 rounded-xl shadow-sm p-4 mb-6">
             <h3 class="text-base font-bold text-gray-800 mb-3">热销团购</h3>
             <div class="flex gap-3">
@@ -238,7 +232,6 @@
             </div>
         </div>
     </div>
-
     <!-- 已过号模板：【这里直接用tu2.jpg图片】 -->
     <div id="passedPage" class="max-w-md mx-auto min-h-screen bg-white hidden">
         <div class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 flex items-center">
@@ -251,7 +244,6 @@
             <div class="passed-step-img">
                 <img src="tu2.jpg" alt="取号成功、商家叫号、已过号">
             </div>
-
             <div class="text-left mt-6 text-gray-700 text-sm">
                 <p id="passedNo">我的号码：双人位B353号</p>
                 <p id="passedTime">取号时间：13:02（已等待 231 分钟）</p>
@@ -267,7 +259,10 @@
             <p class="text-sm text-gray-600">温馨提示：本店为食品经营场所，根据相关规定，所有宠物（持有效证件的导盲犬等工作犬除外）禁止进入门店内用餐区域，谢谢配合<br>！！！取号及过号规则请点击“全部……</p>
         </div>
     </div>
-
+    <!-- ICP备案链接 放在页面底部 -->
+    <div style="text-align:center;padding:12px 0;font-size:12px;color:#999;">
+        <a href="https://beian.miit.gov.cn/" target="_blank" style="color:#999;text-decoration:none;">粤ICP备2026176871号</a>
+    </div>
 <script>
 let currentUser = null;
 const MAX_WAIT = 300;
@@ -283,7 +278,6 @@ const statusMapText = {
     2:"已就餐",
     3:"已过号"
 };
-
 async function checkVisitorCode() {
     const input = document.getElementById('visitorCodeInput').value.trim();
     if(input === "dev7777777"){
@@ -309,7 +303,6 @@ async function checkVisitorCode() {
         alert("查询失败："+e.message);
     }
 }
-
 function backLogin(){
     currentUser = null;
     document.getElementById('loginBox').classList.remove('hidden');
@@ -317,7 +310,6 @@ function backLogin(){
     document.getElementById('passedPage').classList.add('hidden');
     document.getElementById('errTip').classList.add('hidden');
 }
-
 function calcWaitMinutes(takeTimeStr) {
     const [h, m] = takeTimeStr.split(':').map(Number);
     const take = new Date();
@@ -327,11 +319,9 @@ function calcWaitMinutes(takeTimeStr) {
     if(diff < 0) diff += 24*60;
     return diff;
 }
-
 function pad(num) {
     return String(num).padStart(2,'0');
 }
-
 function loadViewData(){
     if(!currentUser) return;
     const waitMin = calcWaitMinutes(currentUser.takeTime);
@@ -362,7 +352,6 @@ function loadViewData(){
         document.getElementById(`s${currentUser.status}-text`).className = "step-text current";
     }
 }
-
 function updateTime(){
     const now = new Date();
     const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
